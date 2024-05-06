@@ -123,8 +123,8 @@ function showCart() {
         <tr>
         <td id="img-${product.id}"><img src="${product.image}" alt="image" width="100" height="80" ></td>
         <td>${product.libelle}</td>
-        <td id="montant-${product.id}">${product.prix} € </td>
-        <td>${qte}</td>
+        <td id="montant-${product.id}">${product.prix} </td>
+        <td id="qte-${product.id}">${qte}</td>
         <td id="btnRetire-${product.id}">
         <button class="btn btn-danger bi bi-trash" id="btnRetrait-${product.id}" onclick="removed('${product.id}')"></button>
         </td>
@@ -134,7 +134,7 @@ function showCart() {
     total.innerHTML =`
     <tr>
     <td colspan="2">Total</td>
-    <td  id="totale">${montant} € </td>
+    <td  id="totale">${montant}</td>
     </tr>
     ` 
 }
@@ -203,11 +203,13 @@ function btnActive(id){
 
 function removed(id){
     let btn = document.getElementById(`btnRetrait-${id}`);
-    document.getElementById('totale').textContent
+    let qte = document.getElementById(`qte-${id}`).textContent;
+    var montant = document.getElementById('totale').textContent
+    console.log(montant);
     let tdMontant = document.getElementById(`montant-${id}`);
     let demande = confirm('Voulez-vous vraiment supprimer ???');
     if (demande){ 
-        montant -= tdMontant.textContent;
+        montant -= parseInt(tdMontant.textContent) * qte;
         console.log(montant);
         document.getElementById('totale').textContent = montant
         btn.parentElement.parentElement.remove();
@@ -215,7 +217,7 @@ function removed(id){
 }
 
 function showInformation(){
-    info = document.getElementById('info')
+    let info = document.getElementById('info')
     infos.removeAttribute('hidden')
     info.innerHTML +=`
     <tr>
@@ -229,6 +231,7 @@ function showInformation(){
 
 (document.getElementById('btnPanier')).addEventListener('click',()=>{
     infos.setAttribute('hidden','')
+    commander.textContent = 'Commander'
 })
 
 envoie.addEventListener('click',()=>{
@@ -249,4 +252,62 @@ function fieldHidden(){
     action = document.getElementById('action')
     image.setAttribute('hidden','')
     action.setAttribute('hidden','')
+}
+
+function convertirEnPDF() {
+    const container = document.body;
+    const options = {
+        margin: 0.5,
+        filename: 'commande.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().from(container).set(options).save();
+}
+
+commander.addEventListener('click',()=>{
+    if (commander.textContent == 'Telecharger') {
+        convertirEnPDF()
+        commander.removeAttribute('data-target')
+    }
+})
+
+function verifyFirstName(){
+    const nomInvalid = document.getElementById('nomInvalid')
+    if (nom.value.trim() == '') {
+        nomInvalid.removeAttribute('hidden')
+        nom.style.borderColor = 'red'
+        return false
+    }else{
+        nomInvalid.setAttribute('hidden','')
+        nom.style.borderColor = 'gray'
+        return true
+    }
+}
+
+function verifyLastName(){
+    const prenomInvalid = document.getElementById('prenomInvalid')
+    if (prenom.value.trim() == '') {
+        prenomInvalid.removeAttribute('hidden')
+        prenom.style.borderColor = 'red'
+        return false
+    }else{
+        prenomInvalid.setAttribute('hidden','')
+        prenom.style.borderColor = 'gray'
+        return true
+    }
+}
+
+function verifyAddress(){
+    const adresseInvalid = document.getElementById('adresseInvalid')
+    if (adresse.value.trim() == '') {
+       adresseInvalid.removeAttribute('hidden')
+        adresse.style.borderColor = 'red'
+        envoie.setAttribute('disabled','')
+    }else{
+       adresseInvalid.setAttribute('hidden','')
+        adresse.style.borderColor = 'gray'
+        envoie.removeAttribute('disabled')
+    }
 }
